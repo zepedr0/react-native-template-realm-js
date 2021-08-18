@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { SafeAreaView, View, Text, TextInput, Pressable, FlatList, StyleSheet } from 'react-native';
 import Realm from 'realm';
 import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
@@ -70,7 +70,7 @@ export default function App() {
   const handleAddTask = () => {
     if (!newTaskDescription)
       return;
-    
+
     // Everything in the function passed to "realm.write" is a transaction and will
     // hence succeed or fail together. A transcation is the smallest unit of transfer
     // in Realm so we want to be mindful of how much we put into one single transaction
@@ -149,7 +149,7 @@ export default function App() {
           <View style={styles.content}>
             <FlatList
               data={tasks}
-              keyExtractor={(item) => item._id.toString()}
+              keyExtractor={(task) => task._id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.task}>
                   <Pressable
@@ -157,7 +157,7 @@ export default function App() {
                     style={[styles.taskStatus, item.isComplete && styles.completedStatus]}
                   >
                     <Text style={[styles.icon, item.isComplete && styles.checkmark]}>
-                      {item.isComplete ? '✓' : '◯'}
+                      {item.isComplete ? '✓' : '○'}
                     </Text>
                   </Pressable>
                   <View style={styles.taskDescriptionContainer}>
@@ -183,6 +183,10 @@ export default function App() {
     </SafeAreaView>
   );
 }
+
+const shouldNotRerender = (prevProps, nextProps) => (
+  prevProps.task._id.toString() === nextProps.task._id.toString()
+);
 
 const styles = StyleSheet.create({
   screen: {
@@ -284,6 +288,6 @@ const styles = StyleSheet.create({
     fontSize: 15
   },
   checkmark: {
-    fontSize: 15
+    fontSize: 18
   }
 });
