@@ -33,12 +33,25 @@ export default function App() {
 
   const [text, setText] = useState('');
   const [tasks, setTasks] = useState([]);
+
   const handleAddTask = () => {
     if (text === '')
       return;
 
     setTasks([...tasks, { id: tasks.length, description: text, isComplete: false }]);
     setText('');
+  }
+
+  const handleToggleTask = (id) => {
+    setTasks(tasks.map((task) => task.id === id
+      ? { id, description: task.description, isComplete: !task.isComplete }
+      : task
+    ));
+  }
+
+  const handleDeleteTask = (id) => {
+    const newTasks = tasks.filter((task) => task.id !== id);
+    setTasks(newTasks);
   }
 
   return (
@@ -70,20 +83,23 @@ export default function App() {
         </View>) :
         (<View style={styles.content}>
           <FlatList
+            style={styles.flatList}
             data={tasks}
             keyExtractor={task => task.id}
             renderItem={({ item }) => (
               <View style={styles.task}>
-                <Pressable style={styles.submit2} onPress={handleAddTask}>
-                  <Text style={styles.icon2}>
-                    ＋
+                <Pressable style={[styles.taskStatus, item.isComplete && styles.completedStatus]} onPress={() => handleToggleTask(item.id)}>
+                  <Text style={[styles.icon, item.isComplete && styles.checkmark]}>
+                    {item.isComplete ? '✓' : '-'}
                   </Text>
                 </Pressable>
-                <Text style={styles.taskDescription}>
-                  {item.description}
-                </Text>
-                <Pressable style={styles.submit3} onPress={handleAddTask}>
-                  <Text style={styles.icon3}>
+                <View style={styles.taskDescriptionContainer}>
+                  <Text style={styles.taskDescription} numberOfLines={1} >
+                    {item.description}
+                  </Text>
+                </View>
+                <Pressable style={styles.deleteButton} onPress={() => handleDeleteTask(item.id)}>
+                  <Text style={styles.deleteText}>
                     Delete
                   </Text>
                 </Pressable>
@@ -139,6 +155,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     justifyContent: 'center',
   },
+  flatList : {
+    marginTop: 20
+  },
   paragraph: {
     color: '#FFFFFF',
     fontSize: 15,
@@ -151,11 +170,46 @@ const styles = StyleSheet.create({
   },
   task: {
     flexDirection: 'row',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    borderRadius: 5,
+    marginVertical: 7,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 3
+  },
+  taskDescriptionContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   taskDescription: {
-    flex: 1,
     color: '#000000',
     fontSize: 15,
+    paddingHorizontal: 10
+  },
+  taskStatus: {
+    justifyContent: 'center',
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
+    backgroundColor: '#B5B5B5',
+    width: 50,
+    height: 50
+  },
+  completedStatus: {
+    backgroundColor: '#6E60F9'
+  },
+  deleteButton: {
+    justifyContent: 'center',
+  },
+  deleteText: {
+    color: '#B5B5B5',
+    marginHorizontal: 10,
+    fontSize: 15
+  },
+  checkmark : {
+    fontSize: 15
   }
 });
