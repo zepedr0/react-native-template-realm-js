@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, Pressable, Text, StyleSheet, SafeAreaView } from 'react-native';
 import Realm from 'realm';
 
 class Task {
@@ -30,8 +30,11 @@ const configuration = {
 const realm = new Realm(configuration);
 
 export default function App() {
+
+  const [tasks, setTasks] = useState([]);
+
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <View style={styles.form}>
         <TextInput style={styles.textInput} placeholder="Task name to add" />
         <Pressable style={styles.submit}>
@@ -40,7 +43,23 @@ export default function App() {
           </Text>
         </Pressable>
       </View>
-    </View>
+      {tasks.length === 0 ? (
+        <View style={styles.content}>
+          <Text style={styles.paragraph}>
+            Welcome to the Realm React Native TypeScript Template
+          </Text>
+          <Text style={styles.paragraph}>
+            Start adding Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </Text>
+          <Text style={styles.paragraph}>
+            You can find more information about the React Native Realm SDK in:
+          </Text>
+          <Text style={[styles.paragraph, styles.link]}>
+            docs.mongodb.com/realm/sdk/react-native
+          </Text>
+        </View>) : null
+      }
+    </SafeAreaView>
   );
 }
 
@@ -51,7 +70,6 @@ const styles = StyleSheet.create({
   },
   form: {
     flexDirection: 'row',
-    marginTop: 60,
     paddingHorizontal: 20,
     shadowColor: '#000000',
     shadowOffset: {
@@ -81,6 +99,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
     fontSize: 20,
+    fontWeight: 'bold'
+  },
+  content : {
+    flex: 1,
+    marginHorizontal: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paragraph : {
+    color: '#FFFFFF',
+    fontSize: 15,
+    textAlign: 'center',
+    marginVertical: 10
+  },
+  link : {
+    color: '#6E60F9',
     fontWeight: 'bold'
   }
 });
