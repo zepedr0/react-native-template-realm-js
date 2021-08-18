@@ -21,6 +21,13 @@ class Task {
   };
 }
 
+const configuration = {
+  schema: [Task.schema],
+  // deleteRealmIfMigrationNeeded: true,
+};
+
+const realm = new Realm(configuration);
+
 export default function App() {
   return null;
 }
