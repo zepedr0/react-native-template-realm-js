@@ -10,6 +10,9 @@ PODS:
     - React-jsi (= 0.65.0)
     - ReactCommon/turbomodule/core (= 0.65.0)
   - fmt (6.2.1)
+  - GCDWebServer (3.5.4):
+    - GCDWebServer/Core (= 3.5.4)
+  - GCDWebServer/Core (3.5.4)
   - glog (0.3.5)
   - RCT-Folly (2021.04.26.00):
     - boost-for-react-native
@@ -270,6 +273,9 @@ PODS:
     - React-cxxreact (= 0.65.0)
     - React-jsi (= 0.65.0)
     - React-perflogger (= 0.65.0)
+  - RealmJS (10.6.1):
+    - GCDWebServer
+    - React
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -302,12 +308,14 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - RealmJS (from `../node_modules/realm`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - boost-for-react-native
     - fmt
+    - GCDWebServer
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -364,6 +372,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RealmJS:
+    :path: "../node_modules/realm"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -373,6 +383,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 55f5afbbb8f5021a000c3d9289820d17cbc541b3
   FBReactNativeSpec: c2d85d69490fc5666bc4123dff3b9b72db06a987
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+  GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   glog: 5337263514dd6f09803962437687240c5dc39aa4
   RCT-Folly: 0dd9e1eb86348ecab5ba76f910b56f4b5fef3c46
   RCTRequired: 564b40c9e3d5f4d766333577782408770a61dae9
@@ -397,6 +408,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: ca17687ea259e8b6bbd4ad74f1f6ec87bff845d8
   React-runtimeexecutor: a9a1ac6a60389c3c588fd9b9158a30ed4d8d28a4
   ReactCommon: c11b11a5dc8187826144b7b3d72125c77a1b7b1a
+  RealmJS: 550ecbe8a0d55bd0e2abb79a63313d4da08bcf25
   Yoga: 1561f557b0c2b6047a91f7619f666134e2288916
 
 PODFILE CHECKSUM: 61c72a83937965bec3f5a9f4852c5b1aeecc02de
