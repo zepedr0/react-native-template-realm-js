@@ -70,7 +70,7 @@ export default function App() {
             Welcome to the Realm React Native TypeScript Template
           </Text>
           <Text style={styles.paragraph}>
-            Start adding Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+           Start adding a task at the form on top of the screen to see how they are created in Realm and update the UI. You can also change a task status or remove it from the tasks list.
           </Text>
           <Text style={styles.paragraph}>
             You can find more information about the React Native Realm SDK in:
