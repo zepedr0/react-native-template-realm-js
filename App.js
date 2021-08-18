@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, TextInput, Pressable, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import Realm from 'realm';
-
+import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
 class Task {
   constructor({ id = new Realm.BSON.ObjectId(), description, isComplete = false }) {
     this._id = id;
@@ -31,13 +31,21 @@ const realm = new Realm(configuration);
 
 export default function App() {
 
+  const [text, setText] = useState('');
   const [tasks, setTasks] = useState([]);
+  const handleAddTask = () => {
+    if (text === '')
+      return;
+
+    setTasks([...tasks, { id: tasks.length, description: text, isComplete: false }]);
+    setText('');
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.form}>
-        <TextInput style={styles.textInput} placeholder="Task name to add" />
-        <Pressable style={styles.submit}>
+        <TextInput style={styles.textInput} placeholder="Task name to add" onChangeText={setText} value={text} autoCorrect={false} />
+        <Pressable style={styles.submit} onPress={handleAddTask}>
           <Text style={styles.icon}>
             ＋
           </Text>
@@ -54,10 +62,35 @@ export default function App() {
           <Text style={styles.paragraph}>
             You can find more information about the React Native Realm SDK in:
           </Text>
-          <Text style={[styles.paragraph, styles.link]}>
-            docs.mongodb.com/realm/sdk/react-native
-          </Text>
-        </View>) : null
+          <Pressable onPress={() => openURLInBrowser('https://docs.mongodb.com/realm/sdk/react-native/')}>
+            <Text style={[styles.paragraph, styles.link]}>
+              docs.mongodb.com/realm/sdk/react-native
+            </Text>
+          </Pressable>
+        </View>) :
+        (<View style={styles.content}>
+          <FlatList
+            data={tasks}
+            keyExtractor={task => task.id}
+            renderItem={({ item }) => (
+              <View style={styles.task}>
+                <Pressable style={styles.submit2} onPress={handleAddTask}>
+                  <Text style={styles.icon2}>
+                    ＋
+                  </Text>
+                </Pressable>
+                <Text style={styles.taskDescription}>
+                  {item.description}
+                </Text>
+                <Pressable style={styles.submit3} onPress={handleAddTask}>
+                  <Text style={styles.icon3}>
+                    Delete
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          />
+        </View>)
       }
     </SafeAreaView>
   );
@@ -101,20 +134,28 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold'
   },
-  content : {
+  content: {
     flex: 1,
     marginHorizontal: 20,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  paragraph : {
+  paragraph: {
     color: '#FFFFFF',
     fontSize: 15,
     textAlign: 'center',
     marginVertical: 10
   },
-  link : {
+  link: {
     color: '#6E60F9',
     fontWeight: 'bold'
+  },
+  task: {
+    flexDirection: 'row',
+    backgroundColor: 'white'
+  },
+  taskDescription: {
+    flex: 1,
+    color: '#000000',
+    fontSize: 15,
   }
 });
