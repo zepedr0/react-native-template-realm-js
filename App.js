@@ -156,7 +156,7 @@ export default function App() {
                     onPress={() => handleToggleTask(item)}
                     style={[styles.taskStatus, item.isComplete && styles.completedStatus]}
                   >
-                    <Text style={[styles.icon, item.isComplete && styles.checkmark]}>
+                    <Text style={styles.icon}>
                       {item.isComplete ? '✓' : '○'}
                     </Text>
                   </Pressable>
@@ -188,44 +188,51 @@ const shouldNotRerender = (prevProps, nextProps) => (
   prevProps.task._id.toString() === nextProps.task._id.toString()
 );
 
+const colors = {
+  darkBlue : '#2A3642',
+  purple : '#6E60F9',
+  gray : '#B5B5B5'
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#2A3642'
+    backgroundColor: colors.darkBlue
   },
   form: {
     flexDirection: 'row',
+    marginTop: 20,
     paddingHorizontal: 20,
-    shadowColor: '#000000',
+    shadowColor: 'black',
     shadowOffset: {
       width: 0,
       height: 4
     },
     shadowOpacity: 0.7,
-    shadowRadius: 3
-
-    // TODO: ADD FOR ANDROID
+    shadowRadius: 3,
+    elevation: 3
   },
   textInput: {
     flex: 1,
     padding: 15,
     borderRadius: 5,
-    backgroundColor: '#FFFFFF',
-    fontSize: 15,
+    backgroundColor: 'white',
+    fontSize: 17,
+    paddingVertical: 0
   },
   submit: {
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 20,
     borderRadius: 5,
-    backgroundColor: '#6E60F9',
+    backgroundColor: colors.purple,
     width: 50,
     height: 50
   },
   icon: {
-    color: '#FFFFFF',
+    color: 'white',
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 'bold'
   },
   content: {
@@ -237,13 +244,14 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   paragraph: {
-    color: '#FFFFFF',
-    fontSize: 15,
+    color: 'white',
+    fontSize: 17,
     textAlign: 'center',
+    fontWeight: '500',
     marginVertical: 10
   },
   link: {
-    color: '#6E60F9',
+    color: colors.purple,
     fontWeight: 'bold'
   },
   task: {
@@ -251,43 +259,41 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 5,
     marginVertical: 7,
-    shadowColor: '#000000',
+    shadowColor: 'black',
     shadowOffset: {
       width: 0,
       height: 4
     },
     shadowOpacity: 0.7,
-    shadowRadius: 3
+    shadowRadius: 3,
+    elevation: 3
   },
   taskDescriptionContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   taskDescription: {
-    color: '#000000',
-    fontSize: 15,
+    color: 'black',
+    fontSize: 17,
     paddingHorizontal: 10
   },
   taskStatus: {
     justifyContent: 'center',
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5,
-    backgroundColor: '#B5B5B5',
+    backgroundColor: colors.gray,
     width: 50,
     height: 50
   },
   completedStatus: {
-    backgroundColor: '#6E60F9'
+    backgroundColor: colors.purple
   },
   deleteButton: {
     justifyContent: 'center',
   },
   deleteText: {
-    color: '#B5B5B5',
+    color: colors.gray,
     marginHorizontal: 10,
-    fontSize: 15
+    fontSize: 17
   },
-  checkmark: {
-    fontSize: 18
-  }
 });
