@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
-import { SafeAreaView, View, Text, TextInput, Pressable, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { SafeAreaView, View, Text, TextInput, Pressable, FlatList, StyleSheet, Platform } from 'react-native';
 import Realm from 'realm';
 import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
 
@@ -110,190 +110,207 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <View style={styles.form}>
-        <TextInput
-          value={newTaskDescription}
-          placeholder='Task name to add'
-          onChangeText={setNewTaskDescription}
-          autoCorrect={false}
-          style={styles.textInput}
-        />
-        <Pressable
-          onPress={handleAddTask}
-          style={styles.submit}
-        >
-          <Text style={styles.icon}>
-            ＋
-          </Text>
-        </Pressable>
-      </View>
-      {(tasks.length === 0)
-        ? (
-          <View style={styles.content}>
-            <Text style={styles.paragraph}>
-              Welcome to the Realm React Native TypeScript Template
+      <View style={styles.contentContainer}>
+        <View style={styles.form}>
+          <TextInput
+            value={newTaskDescription}
+            placeholder='Enter new task description'
+            onChangeText={setNewTaskDescription}
+            autoCorrect={false}
+            style={styles.textInput}
+          />
+          <Pressable
+            onPress={handleAddTask}
+            style={styles.submit}
+          >
+            <Text style={styles.icon}>
+              ＋
             </Text>
-            <Text style={styles.paragraph}>
-              Start adding a task at the form on top of the screen to see how they are created in Realm and update the UI. You can also change a task status or remove it from the tasks list.
-            </Text>
-            <Text style={styles.paragraph}>
-              You can find more information about the React Native Realm SDK in:
-            </Text>
-            <Pressable onPress={() => openURLInBrowser('https://docs.mongodb.com/realm/sdk/react-native/')}>
-              <Text style={[styles.paragraph, styles.link]}>
-                docs.mongodb.com/realm/sdk/react-native
+          </Pressable>
+        </View>
+        {(tasks.length === 0)
+          ? (
+            <View style={styles.content}>
+              <Text style={styles.paragraph}>
+                Welcome to the Realm React Native TypeScript Template
               </Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={styles.content}>
-            <FlatList
-              data={tasks}
-              keyExtractor={(task) => task._id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.task}>
-                  <Pressable
-                    onPress={() => handleToggleTask(item)}
-                    style={[styles.taskStatus, item.isComplete && styles.completedStatus]}
-                  >
-                    <Text style={styles.icon}>
-                      {item.isComplete ? '✓' : '○'}
-                    </Text>
-                  </Pressable>
-                  <View style={styles.taskDescriptionContainer}>
-                    <Text style={styles.taskDescription} numberOfLines={1} >
-                      {item.description}
-                    </Text>
+              <Text style={styles.paragraph}>
+                Start adding a task at the form on top of the screen to see how they are created in Realm and update the UI. You can also change a task status or remove it from the tasks list.
+              </Text>
+              <Text style={styles.paragraph}>
+                You can find more information about the React Native Realm SDK in:
+              </Text>
+              <Pressable onPress={() => openURLInBrowser('https://docs.mongodb.com/realm/sdk/react-native/')}>
+                <Text style={[styles.paragraph, styles.link]}>
+                  docs.mongodb.com/realm/sdk/react-native
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.content}>
+              <FlatList
+                data={tasks}
+                keyExtractor={(task) => task._id.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.task}>
+                    <Pressable
+                      onPress={() => handleToggleTask(item)}
+                      style={[styles.taskStatus, item.isComplete && styles.completedStatus]}
+                    >
+                      <Text style={styles.icon}>
+                        {item.isComplete ? '✓' : '○'}
+                      </Text>
+                    </Pressable>
+                    <View style={styles.taskDescriptionContainer}>
+                      <Text
+                        numberOfLines={1}
+                        style={styles.taskDescription}
+                      >
+                        {item.description}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => handleDeleteTask(item)}
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteText}>
+                        Delete
+                      </Text>
+                    </Pressable>
                   </View>
-                  <Pressable
-                    onPress={() => handleDeleteTask(item)}
-                    style={styles.deleteButton}
-                  >
-                    <Text style={styles.deleteText}>
-                      Delete
-                    </Text>
-                  </Pressable>
-                </View>
-              )}
-              style={styles.flatList}
-            />
-          </View>
-        )
-      }
+                )}
+              />
+            </View>
+          )
+        }
+      </View>
     </SafeAreaView>
   );
 }
 
-const shouldNotRerender = (prevProps, nextProps) => (
-  prevProps.task._id.toString() === nextProps.task._id.toString()
-);
-
 const colors = {
   darkBlue : '#2A3642',
   purple : '#6E60F9',
-  gray : '#B5B5B5'
-}
+  gray : '#B5B5B5',
+  white: '#FFFFFF',
+  black: '#000000'
+};
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.darkBlue
   },
+  contentContainer: {
+    flex: 1,
+    paddingTop: 20,
+    paddingHorizontal: 20 
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center'
+  },
   form: {
+    height: 50,
+    marginBottom: 20,
     flexDirection: 'row',
-    marginTop: 20,
-    paddingHorizontal: 20,
-    shadowColor: 'black',
-    shadowOffset: {
-      width: 0,
-      height: 4
-    },
-    shadowOpacity: 0.7,
-    shadowRadius: 3,
-    elevation: 3
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.black,
+        shadowOffset: {
+          width: 0,
+          height: 4
+        },
+        shadowOpacity: 0.7,
+        shadowRadius: 3
+      },
+      android: {
+        elevation: 3
+      }
+    })
   },
   textInput: {
     flex: 1,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: Platform.OS === 'ios' ? 15 : 0,
     borderRadius: 5,
-    backgroundColor: 'white',
-    fontSize: 17,
-    paddingVertical: 0
+    backgroundColor: colors.white,
+    fontSize: 17
   },
   submit: {
+    height: '100%',
+    width: 50,
+    marginLeft: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 20,
     borderRadius: 5,
-    backgroundColor: colors.purple,
-    width: 50,
-    height: 50
+    backgroundColor: colors.purple
   },
   icon: {
-    color: 'white',
+    color: colors.white,
     textAlign: 'center',
     fontSize: 17,
     fontWeight: 'bold'
   },
-  content: {
-    flex: 1,
-    marginHorizontal: 20,
-    justifyContent: 'center',
-  },
-  flatList: {
-    marginTop: 20
-  },
   paragraph: {
+    marginVertical: 10,
+    textAlign: 'center',
     color: 'white',
     fontSize: 17,
-    textAlign: 'center',
-    fontWeight: '500',
-    marginVertical: 10
+    fontWeight: '500'
   },
   link: {
     color: colors.purple,
     fontWeight: 'bold'
   },
   task: {
+    height: 50,
+    alignSelf: 'stretch',
     flexDirection: 'row',
-    backgroundColor: 'white',
+    marginVertical: 8,
+    backgroundColor: colors.white,
     borderRadius: 5,
-    marginVertical: 7,
-    shadowColor: 'black',
-    shadowOffset: {
-      width: 0,
-      height: 4
-    },
-    shadowOpacity: 0.7,
-    shadowRadius: 3,
-    elevation: 3
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.black,
+        shadowOffset: {
+          width: 0,
+          height: 4
+        },
+        shadowOpacity: 0.7,
+        shadowRadius: 3
+      },
+      android: {
+        elevation: 3
+      }
+    })
   },
   taskDescriptionContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   taskDescription: {
-    color: 'black',
-    fontSize: 17,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    color: colors.black,
+    fontSize: 17
   },
   taskStatus: {
+    width: 50,
+    height: '100%',
     justifyContent: 'center',
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5,
-    backgroundColor: colors.gray,
-    width: 50,
-    height: 50
+    backgroundColor: colors.gray
   },
   completedStatus: {
     backgroundColor: colors.purple
   },
   deleteButton: {
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   deleteText: {
-    color: colors.gray,
     marginHorizontal: 10,
+    color: colors.gray,
     fontSize: 17
-  },
+  }
 });
