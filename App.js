@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SafeAreaView, View, Text, TextInput, Pressable, FlatList, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView, View, StyleSheet } from 'react-native';
 import Realm from 'realm';
-import openURLInBrowser from 'react-native/Libraries/Core/Devtools/openURLInBrowser';
 
-import Task from './Task';
+import Task from './app/models/Task';
+import IntroText from './app/components/IntroText';
+import AddTaskForm from './app/components/AddTaskForm';
+import TaskList from './app/components/TaskList';
+import colors from './app/styles/colors';
 
-export default function App() {
-  const [newTaskDescription, setNewTaskDescription] = useState('');
+function App() {
+  // The tasks will be set once the realm has opened and the collection has been queried.
   const [tasks, setTasks] = useState([]);
+  // We store a reference to our realm using useRef that allows us to access it via
+  // realmRef.current for the component's lifetime without causing rerenders if updated.
   const realmRef = useRef(null);
+  // The first time we query the Realm tasks collection we add a listener to it.
+  // We store the listener in "subscriptionRef" to be able to remove it when the component unmounts.
   const subscriptionRef = useRef(null);
 
   useEffect(() => {
@@ -18,30 +25,36 @@ export default function App() {
     return closeRealm;
   }, []);
 
-  const openRealm = () => {
+  const openRealm = async () => {
     try {
-      // Open a local realm file with the schemas
+      // Open a local realm file with the schema(s) that are a part of this realm.
       const config = {
         schema: [Task.schema],
-        // deleteRealmIfMigrationNeeded: true
+        // Uncomment the line below to specify that this Realm should be deleted if a migration is needed.
+        // (This option is not available on synced realms and is NOT suitable for production when set to true)
+        // deleteRealmIfMigrationNeeded: true   // default is false
       };
 
-      const realm = new Realm(config);
+      // Since this is a non-sync realm (there is no "sync" field defined in the "config" object),
+      // the realm will be opened synchronously when calling "Realm.open"
+      const realm = await Realm.open(config);
       realmRef.current = realm;
-
+      
       // When querying a realm to find objects (e.g. realm.objects('Tasks')) the result we get back
       // and the objects in it are "live" and will always reflect the latest state.
       const tasks = realm.objects('Task');
       if (tasks?.length)
         setTasks(tasks);
-
+      
       // Live queries and objects emit notifications when something has changed that we can listen for.
       subscriptionRef.current = tasks;
       tasks.addListener((/*collection, changes*/) => {
-        // If wanting to handle deletions, insertions, and modifications differently
-        // you can access them through the two arguments. (Always handle them in the
-        // following order: deletions, insertions, modifications)
-        // e.g. changes.insertions.forEach((index) => console.log('Inserted task: ', collection[index]));
+        // If wanting to handle deletions, insertions, and modifications differently you can access them through
+        // the two arguments. (Always handle them in the following order: deletions, insertions, modifications)
+        // If using collection listener (1st arg is the collection):
+        // e.g. changes.insertions.forEach((index) => console.log('Inserted item: ', collection[index]));
+        // If using object listener (1st arg is the object):
+        // e.g. changes.changedProperties.forEach((prop) => console.log(`${prop} changed to ${object[prop]}`));
 
         // By querying the objects again, we get a new reference to the Result and triggers
         // a rerender by React. Setting the tasks to either 'tasks' or 'collection' (from the
@@ -67,8 +80,8 @@ export default function App() {
     setTasks([]);
   };
 
-  const handleAddTask = () => {
-    if (!newTaskDescription)
+  const handleAddTask = (description) => {
+    if (!description)
       return;
 
     // Everything in the function passed to "realm.write" is a transaction and will
@@ -80,13 +93,11 @@ export default function App() {
     // no changes propagate and the transaction needs to start over when connectivity allows.
     const realm = realmRef.current;
     realm?.write(() => {
-      realm?.create('Task', new Task({ description: newTaskDescription }));
+      realm?.create('Task', new Task({ description }));
     });
-
-    setNewTaskDescription('');
   };
 
-  const handleToggleTask = (task) => {
+  const handleToggleTaskStatus = (task) => {
     const realm = realmRef.current;
     realm?.write(() => {
       // Normally when updating a record in a NoSQL or SQL database, we have to type
@@ -99,88 +110,37 @@ export default function App() {
       // locally will also see the changes "live".
       task.isComplete = !task.isComplete;
     });
+
+    // Alternatively if passing the ID as the argument to handleToggleTaskStatus:
+    // realm?.write(() => {
+    //   const task = realm?.objectForPrimaryKey('Task', id); // If the ID is passed as an ObjectId
+    //   const task = realm?.objectForPrimaryKey('Task', Realm.BSON.ObjectId(id));  // If the ID is passed as a string
+    //   task.isComplete = !task.isComplete;
+    // });
   };
 
   const handleDeleteTask = (task) => {
     const realm = realmRef.current;
     realm?.write(() => {
       realm?.delete(task);
+
+      // Alternatively if passing the ID as the argument to handleDeleteTask:
+      // realm?.delete(realm?.objectForPrimaryKey('Task', id));
     });
   };
 
   return (
     <SafeAreaView style={styles.screen}>
-      <View style={styles.contentContainer}>
-        <View style={styles.form}>
-          <TextInput
-            value={newTaskDescription}
-            placeholder='Enter new task description'
-            onChangeText={setNewTaskDescription}
-            autoCorrect={false}
-            style={styles.textInput}
-          />
-          <Pressable
-            onPress={handleAddTask}
-            style={styles.submit}
-          >
-            <Text style={styles.icon}>
-              ＋
-            </Text>
-          </Pressable>
-        </View>
+      <View style={styles.content}>
+        <AddTaskForm onSubmit={handleAddTask} />
         {(tasks.length === 0)
-          ? (
-            <View style={styles.content}>
-              <Text style={styles.paragraph}>
-                Welcome to the Realm React Native TypeScript Template
-              </Text>
-              <Text style={styles.paragraph}>
-                Start adding a task at the form on top of the screen to see how they are created in Realm and update the UI. You can also change a task status or remove it from the tasks list.
-              </Text>
-              <Text style={styles.paragraph}>
-                You can find more information about the React Native Realm SDK in:
-              </Text>
-              <Pressable onPress={() => openURLInBrowser('https://docs.mongodb.com/realm/sdk/react-native/')}>
-                <Text style={[styles.paragraph, styles.link]}>
-                  docs.mongodb.com/realm/sdk/react-native
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <View style={styles.content}>
-              <FlatList
-                data={tasks}
-                keyExtractor={(task) => task._id.toString()}
-                renderItem={({ item }) => (
-                  <View style={styles.task}>
-                    <Pressable
-                      onPress={() => handleToggleTask(item)}
-                      style={[styles.taskStatus, item.isComplete && styles.completedStatus]}
-                    >
-                      <Text style={styles.icon}>
-                        {item.isComplete ? '✓' : '○'}
-                      </Text>
-                    </Pressable>
-                    <View style={styles.taskDescriptionContainer}>
-                      <Text
-                        numberOfLines={1}
-                        style={styles.taskDescription}
-                      >
-                        {item.description}
-                      </Text>
-                    </View>
-                    <Pressable
-                      onPress={() => handleDeleteTask(item)}
-                      style={styles.deleteButton}
-                    >
-                      <Text style={styles.deleteText}>
-                        Delete
-                      </Text>
-                    </Pressable>
-                  </View>
-                )}
-              />
-            </View>
+          ? <IntroText />
+          : (
+            <TaskList
+              tasks={tasks}
+              onToggleTaskStatus={handleToggleTaskStatus}
+              onDeleteTask={handleDeleteTask}
+            />
           )
         }
       </View>
@@ -188,129 +148,16 @@ export default function App() {
   );
 }
 
-const colors = {
-  darkBlue : '#2A3642',
-  purple : '#6E60F9',
-  gray : '#B5B5B5',
-  white: '#FFFFFF',
-  black: '#000000'
-};
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.darkBlue
   },
-  contentContainer: {
+  content: {
     flex: 1,
     paddingTop: 20,
     paddingHorizontal: 20 
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center'
-  },
-  form: {
-    height: 50,
-    marginBottom: 20,
-    flexDirection: 'row',
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: {
-          width: 0,
-          height: 4
-        },
-        shadowOpacity: 0.7,
-        shadowRadius: 3
-      },
-      android: {
-        elevation: 3
-      }
-    })
-  },
-  textInput: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: Platform.OS === 'ios' ? 15 : 0,
-    borderRadius: 5,
-    backgroundColor: colors.white,
-    fontSize: 17
-  },
-  submit: {
-    height: '100%',
-    width: 50,
-    marginLeft: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
-    backgroundColor: colors.purple
-  },
-  icon: {
-    color: colors.white,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: 'bold'
-  },
-  paragraph: {
-    marginVertical: 10,
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 17,
-    fontWeight: '500'
-  },
-  link: {
-    color: colors.purple,
-    fontWeight: 'bold'
-  },
-  task: {
-    height: 50,
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    marginVertical: 8,
-    backgroundColor: colors.white,
-    borderRadius: 5,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: {
-          width: 0,
-          height: 4
-        },
-        shadowOpacity: 0.7,
-        shadowRadius: 3
-      },
-      android: {
-        elevation: 3
-      }
-    })
-  },
-  taskDescriptionContainer: {
-    flex: 1,
-    justifyContent: 'center'
-  },
-  taskDescription: {
-    paddingHorizontal: 10,
-    color: colors.black,
-    fontSize: 17
-  },
-  taskStatus: {
-    width: 50,
-    height: '100%',
-    justifyContent: 'center',
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
-    backgroundColor: colors.gray
-  },
-  completedStatus: {
-    backgroundColor: colors.purple
-  },
-  deleteButton: {
-    justifyContent: 'center'
-  },
-  deleteText: {
-    marginHorizontal: 10,
-    color: colors.gray,
-    fontSize: 17
   }
 });
+
+export default App;

@@ -1,6 +1,6 @@
 import { BSON } from 'realm';
 
-export default class Task {
+class Task {
   constructor({ id = new BSON.ObjectId(), description, isComplete = false }) {
     this._id = id;
     this.description = description;
@@ -18,3 +18,5 @@ export default class Task {
     }
   };
 }
+
+export default Task;
