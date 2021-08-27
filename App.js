@@ -8,7 +8,7 @@ import AddTaskForm from './app/components/AddTaskForm';
 import TaskList from './app/components/TaskList';
 import colors from './app/styles/colors';
 
-export default function App() {
+function App() {
   // The tasks will be set once the realm has opened and the collection has been queried.
   const [tasks, setTasks] = useState([]);
   // We store a reference to our realm using useRef that allows us to access it via
@@ -25,30 +25,36 @@ export default function App() {
     return closeRealm;
   }, []);
 
-  const openRealm = () => {
+  const openRealm = async () => {
     try {
       // Open a local realm file with the schema(s) that are a part of this realm.
       const config = {
         schema: [Task.schema],
-        // deleteRealmIfMigrationNeeded: true
+        // Uncomment the line below to specify that this Realm should be deleted if a migration is needed.
+        // (This option is not available on synced realms and is NOT suitable for production when set to true)
+        // deleteRealmIfMigrationNeeded: true   // default is false
       };
 
-      const realm = new Realm(config);
+      // Since this is a non-sync realm (there is no "sync" field defined in the "config" object),
+      // the realm will be opened synchronously when calling "Realm.open"
+      const realm = await Realm.open(config);
       realmRef.current = realm;
       
       // When querying a realm to find objects (e.g. realm.objects('Tasks')) the result we get back
       // and the objects in it are "live" and will always reflect the latest state.
       const tasks = realm.objects('Task');
       if (tasks?.length)
-      setTasks(tasks);
+        setTasks(tasks);
       
       // Live queries and objects emit notifications when something has changed that we can listen for.
       subscriptionRef.current = tasks;
       tasks.addListener((/*collection, changes*/) => {
-        // If wanting to handle deletions, insertions, and modifications differently
-        // you can access them through the two arguments. (Always handle them in the
-        // following order: deletions, insertions, modifications)
-        // e.g. changes.insertions.forEach((index) => console.log('Inserted task: ', collection[index]));
+        // If wanting to handle deletions, insertions, and modifications differently you can access them through
+        // the two arguments. (Always handle them in the following order: deletions, insertions, modifications)
+        // If using collection listener (1st arg is the collection):
+        // e.g. changes.insertions.forEach((index) => console.log('Inserted item: ', collection[index]));
+        // If using object listener (1st arg is the object):
+        // e.g. changes.changedProperties.forEach((prop) => console.log(`${prop} changed to ${object[prop]}`));
 
         // By querying the objects again, we get a new reference to the Result and triggers
         // a rerender by React. Setting the tasks to either 'tasks' or 'collection' (from the
@@ -153,3 +159,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20 
   }
 });
+
+export default App;
