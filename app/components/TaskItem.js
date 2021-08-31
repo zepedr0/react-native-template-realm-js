@@ -1,4 +1,4 @@
-import React/*, { memo, }*/ from 'react';
+import React, { memo } from 'react';
 import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 
 import colors from '../styles/colors';
@@ -93,10 +93,10 @@ const styles = StyleSheet.create({
   }
 });
 
+// We want to make sure only tasks that change are rerendered
 const shouldNotRerender = (prevProps, nextProps) => (
   prevProps.description === nextProps.description
   && prevProps.isComplete === nextProps.isComplete
 );
 
-export default TaskItem;
-//export default memo(TaskItem, shouldNotRerender);
+export default memo(TaskItem, shouldNotRerender);
